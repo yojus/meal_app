@@ -30,16 +30,13 @@
             <label class="block text-gray-700 text-sm mb-2" for="title">
                 カテゴリー
             </label>
-            <div>
-                <label><input type="radio" name="food" value="vegetable" checked>野菜</label>
-            </div>
-            <div>
-                <label><input type="radio" name="food" value="protein">タンパク質</label>
-            </div>
-            <div>
-                <label><input type="radio" name="food" value="carbo">炭水化物</label>
-            </div>
+            @foreach ($categories as $category)
+                <div>
+                    <label><input type="radio" name="food" checked>{{ $category->title }}</label>
+                </div>
+            @endforeach
             <br>
+            
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm mb-2" for="body">
                     詳細

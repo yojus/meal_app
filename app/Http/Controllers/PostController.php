@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Http\Requests\PostRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Category;
 
 class PostController extends Controller
 {
@@ -25,8 +26,10 @@ class PostController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create()
-    {
-        return view('posts.create');
+    {   
+        $categories = Category::all();
+
+        return view('posts.create', compact('categories'));
     }
 
     /**
@@ -39,13 +42,14 @@ class PostController extends Controller
     {
         $post = new Post($request->all());
         $post->user_id = $request->user()->id;
+        $post->category_id = $request->category;
 
         $file = $request->file('image');
         $post->image = date('YmdHis') . '_' . $file->getClientOriginalName();
 
         try {
             $post->save();
-            if(!Storage::putFileAs('public/images/posts', $file, $post->image)) {
+            if(!Storage::putFileAs('images/posts', $file, $post->image)) {
                 throw new \Exception('画像ファイルの保存に失敗しました。');
             }
         } catch (\Throwable $th) {
