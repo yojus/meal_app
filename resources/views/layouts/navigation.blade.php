@@ -21,7 +21,7 @@
                             @auth
                                 <div>{{ Auth::user()->name }}</div>
                             @else
-                                <div>部外者</div>
+                                <div>guest</div>
                             @endauth
 
 
