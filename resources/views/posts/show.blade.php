@@ -7,6 +7,8 @@
             </div>
         @endif
 
+        <x-validation-errors :errors="$errors" />
+
         <article class="mb-2">
             <h2 class="font-bold font-sans break-normal text-gray-900 pt-6 pb-1 text-3xl md:text-4xl">{{ $post->title }}
             </h2>

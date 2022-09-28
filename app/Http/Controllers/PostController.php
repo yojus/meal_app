@@ -26,7 +26,7 @@ class PostController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create()
-    {   
+    {
         $categories = Category::all();
 
         return view('posts.create', compact('categories'));
@@ -45,11 +45,11 @@ class PostController extends Controller
         $post->category_id = $request->category;
 
         $file = $request->file('image');
-        $post->image = date('YmdHis') . '_' . $file->getClientOriginalName();
+        $post->image = self::createFileName($file);
 
         try {
             $post->save();
-            if(!Storage::putFileAs('images/posts', $file, $post->image)) {
+            if (!Storage::putFileAs('images/posts', $file, $post->image)) {
                 throw new \Exception('画像ファイルの保存に失敗しました。');
             }
         } catch (\Throwable $th) {
@@ -80,7 +80,9 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        //
+        $categories = Category::all();
+
+        return view('posts.edit', compact('post', 'categories'));
     }
 
     /**
@@ -92,7 +94,37 @@ class PostController extends Controller
      */
     public function update(PostRequest $request, Post $post)
     {
-        //
+        if ($request->user()->cannot('update', $post)) {
+            return redirect()->route('posts.show', $post)
+                ->withErrors('自分の記事以外は更新できません');
+        }
+
+        $file = $request->file('image');
+        if ($file) {
+            $delete_file_path = 'images/posts/' . $post->image;
+            $post->image = self::createFileName($file);
+        }
+        $post->fill($request->all());
+
+        try {
+            $post->save();
+
+            if ($file) {
+                if (!Storage::putFileAs('images/posts', $file, $post->image)) {
+                    throw new \Exception('画像ファイルの保存に失敗しました。');
+                }
+
+                if (!Storage::delete($delete_file_path)) {
+                    Storage::delete('images/posts/' . $post->image);
+                    throw new \Exception('画像ファイルの削除に失敗しました。');
+                }
+            }
+        } catch (\Exception $e) {
+            return back()->withInput()->withErrors($e->getMessage());
+        }
+
+        return redirect()->route('posts.show', $post)
+            ->with('notice', '記事を更新しました');
     }
 
     /**
@@ -104,5 +136,10 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         //
+    }
+
+    private static function createFileName($file)
+    {
+        return date('YmdHis') . '_' . $file->getClientOriginalName();
     }
 }
