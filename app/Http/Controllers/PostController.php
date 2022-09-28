@@ -16,7 +16,7 @@ class PostController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {   
+    {
         $posts = Post::with('user')->latest()->Paginate(2);
 
         return view('posts.index', compact('posts'));
@@ -103,7 +103,7 @@ class PostController extends Controller
 
         $file = $request->file('image');
         if ($file) {
-            $delete_file_path = 'images/posts/' . $post->image;
+            $delete_file_path = $post->image_path;
             $post->image = self::createFileName($file);
         }
         $post->fill($request->all());
@@ -117,7 +117,7 @@ class PostController extends Controller
                 }
 
                 if (!Storage::delete($delete_file_path)) {
-                    Storage::delete('images/posts/' . $post->image);
+                    Storage::delete($post->image_path);
                     throw new \Exception('画像ファイルの削除に失敗しました。');
                 }
             }
@@ -137,7 +137,18 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //
+        try {
+            $post->delete();
+
+            if (!Storage::delete($post->image_path)) {
+                throw new \Exception('画像ファイルの保存に失敗しました。');
+            }
+        } catch (\Throwable $th) {
+            return back()->withInput()->withErrors($th->getMessage());
+        }
+
+        return redirect()->route('posts.index')
+            ->with('notice', '記事を削除しました');
     }
 
     private static function createFileName($file)
