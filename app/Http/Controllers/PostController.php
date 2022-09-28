@@ -16,8 +16,10 @@ class PostController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
-        return view('posts.index');
+    {   
+        $posts = Post::with('user')->latest()->Paginate(2);
+
+        return view('posts.index', compact('posts'));
     }
 
     /**
