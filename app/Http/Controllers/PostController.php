@@ -104,14 +104,14 @@ class PostController extends Controller
             return redirect()->route('posts.show', $post)
                 ->withErrors('自分の記事以外は更新できません');
         }
-
+        
         $file = $request->file('image');
         if ($file) {
             $delete_file_path = $post->image_path;
             $post->image = self::createFileName($file);
         }
         $post->fill($request->all());
-
+        $post->category_id = $request->category;
         try {
             $post->save();
 
