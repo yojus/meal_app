@@ -21,7 +21,7 @@
             </label>
             @foreach ($categories as $category)
                 <div>
-                    <label><input type="radio" name="food" checked>{{ $category->title }}</label>
+                    <label><input type="radio" name="category" value="{{ $category->id }}" checked>{{ $category->title }}</label>
                 </div>
             @endforeach
             <br>
