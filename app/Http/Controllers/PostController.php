@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Http\Requests\PostRequest;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Category;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Fav;
+use App\Models\Comment;
 
 class PostController extends Controller
 {
@@ -30,7 +32,7 @@ class PostController extends Controller
     public function create()
     {
         $categories = Category::all();
-
+        // dd($categories);
         return view('posts.create', compact('categories'));
     }
 
@@ -71,11 +73,22 @@ class PostController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    {   
+    {
         $post = Post::with(['user'])->find($id);
         $comments = $post->comments()->latest()->get()->load(['user']);
 
-        return view('posts.show', compact('post', 'comments'));
+        if (Auth::check()) {
+            $fav = Fav::with('post')
+                ->where('user_id', auth()->user()->id)
+                ->where('post_id', $post->id)
+                ->first();
+
+            return view('posts.show', compact('post', 'fav', 'comments'));
+        } else {
+            return view('posts.show', compact('post', 'comments'));
+        }
+
+        // return view('posts.show', compact('post', 'comments', 'fav'));
     }
 
     /**
@@ -104,7 +117,7 @@ class PostController extends Controller
             return redirect()->route('posts.show', $post)
                 ->withErrors('自分の記事以外は更新できません');
         }
-        
+
         $file = $request->file('image');
         if ($file) {
             $delete_file_path = $post->image_path;

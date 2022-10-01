@@ -22,6 +22,30 @@
             <img src="{{ $post->image_url }}" alt="" class="mb-4">
             <p class="text-gray-700 text-base">{!! nl2br(e($post->body)) !!}</p>
         </article>
+
+        <div>
+            @auth
+                @if ($fav)
+                    <form action="{{ route('posts.favs.destroy', [$post, $fav]) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <input type="submit" value="お気に入り解除"
+                            class="bg-indigo-400 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline block">
+                    </form>
+                @else
+                    <form action="{{ route('posts.favs.store', $post) }}" method="POST">
+                        @csrf
+                        <input type="submit" value="お気に入り"
+                            class="bg-pink-400 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline block">
+                    </form>
+                @endif
+            @endauth
+        </div>
+
+        <div>
+            <b>お気に入り数:{{ $post->favs->count() }}</b>
+        </div>
+
         <div class="flex flex-row text-center my-4">
             @can('update', $post)
                 <a href="{{ route('posts.edit', $post) }}"

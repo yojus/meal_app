@@ -30,6 +30,11 @@ class Post extends Model
         return $this->hasMany(Comment::class);
     }
 
+    public function favs()
+    {
+        return $this->hasMany(Fav::class);
+    }
+
     public function getImageUrlAttribute()
     {
         return Storage::url($this->image_path);

@@ -51,4 +51,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Comment::class);
     }
+
+    public function favs()
+    {
+        return $this->hasMany(Fav::class);
+    }
 }
